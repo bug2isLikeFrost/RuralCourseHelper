@@ -61,6 +61,24 @@
       line-height: 1.8;
       color: var(--text-dark);
     }
+    .related-link {
+      display: block;
+      padding: 10px 15px;
+      background: #f0f9f4;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      color: var(--bamboo-green);
+      text-decoration: none;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .related-link:hover {
+      background: #e8f5e9;
+      transform: translateX(5px);
+    }
+    .related-link::before {
+      content: '🔗 ';
+    }
     .back-btn {
       display: inline-block;
       padding: 12px 24px;
@@ -140,6 +158,16 @@
           <div class="detail-section-content" id="course-question">-</div>
         </div>
 
+        <div class="detail-section" id="knowledge-section" style="display:none;">
+          <div class="detail-section-title">📚 知识库</div>
+          <div class="detail-section-content" id="course-knowledge-base">-</div>
+        </div>
+
+        <div class="detail-section" id="links-section" style="display:none;">
+          <div class="detail-section-title">🔗 相关链接</div>
+          <div id="course-links"></div>
+        </div>
+
         <a href="index.html" class="back-btn">← 返回首页</a>
       </div>
     </div>
@@ -197,6 +225,20 @@
         document.getElementById('keywords-container').innerHTML = keywords.map(k =>
           `<span class="keyword-tag">${k}</span>`
         ).join('');
+
+        const knowledgeBase = course.知识库 || course.knowledgeBase;
+        if (knowledgeBase) {
+          document.getElementById('course-knowledge-base').textContent = knowledgeBase;
+          document.getElementById('knowledge-section').style.display = 'block';
+        }
+
+        const links = course.相关链接 || course.relatedLinks;
+        if (links && Array.isArray(links) && links.length > 0) {
+          document.getElementById('course-links').innerHTML = links.map(link =>
+            `<a class="related-link" href="${link.url}" target="_blank" rel="noopener">${link.name}</a>`
+          ).join('');
+          document.getElementById('links-section').style.display = 'block';
+        }
 
       } catch (e) {
         console.error('解析失败:', e);

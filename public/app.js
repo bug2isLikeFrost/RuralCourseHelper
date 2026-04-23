@@ -133,9 +133,14 @@
     return String(steps);
   }
 
+  function openCourseDetail(course, localThing) {
+    const encoded = encodeURIComponent(JSON.stringify({ course, localThing }));
+    window.open(`detail.html?data=${encoded}`, '_blank');
+  }
+
   function renderCourses(courses, input) {
     const container = document.getElementById('course-cards');
-    container.innerHTML = courses.map(course => `
+    container.innerHTML = courses.map((course, index) => `
       <div class="course-card">
         <div class="card-header">
           <span class="card-title">${course.课程名称 || course.name || '未命名课程'}</span>
@@ -153,6 +158,9 @@
         <div class="card-section">
           <div class="card-section-title">延伸问题</div>
           <div class="card-section-content">${course.延伸问题 || course.question || '无'}</div>
+        </div>
+        <div class="card-actions">
+          <button class="detail-btn" onclick="openCourseDetail(courses[${index}], '${input.replace(/'/g, "\\'")}')">📖 查看详情</button>
         </div>
       </div>
     `).join('');

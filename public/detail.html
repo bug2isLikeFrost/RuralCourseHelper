@@ -181,10 +181,17 @@
 
     function formatSteps(steps) {
       if (Array.isArray(steps)) {
-        return steps.map((s, i) => `${i + 1}. ${s}`).join('<br>');
+        return steps.map((s, i) => {
+          const cleanStep = String(s).replace(/^\d+[.、)]\s*/, '');
+          return `${i + 1}. ${cleanStep}`;
+        }).join('<br>');
       }
       if (typeof steps === 'string') {
-        return steps.replace(/\n/g, '<br>').replace(/(\d+)\.\s*/g, '<b>$1.</b> ');
+        const lines = steps.split('\n').filter(line => line.trim());
+        return lines.map((line, i) => {
+          const cleanLine = line.replace(/^\d+[.、)]\s*/, '');
+          return `${i + 1}. ${cleanLine}`;
+        }).join('<br>');
       }
       return String(steps);
     }

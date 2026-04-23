@@ -15,6 +15,8 @@ const API_CONFIG = {
   model: 'deepseek-chat'
 };
 
+console.log('API Key loaded:', API_CONFIG.apiKey ? 'YES (length: ' + API_CONFIG.apiKey.length + ')' : 'NO');
+
 app.post('/api/generate', async (req, res) => {
   const { prompt } = req.body;
 
@@ -45,6 +47,7 @@ app.post('/api/generate', async (req, res) => {
     const data = await response.json();
     res.json({ result: data.choices[0].message.content });
   } catch (error) {
+    console.error('API Error:', error);
     res.status(500).json({ error: error.message });
   }
 });

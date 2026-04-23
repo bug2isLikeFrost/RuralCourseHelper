@@ -141,9 +141,10 @@
   };
 
   function renderCourses(courses, input) {
-    window.courseData = courses;
     const container = document.getElementById('course-cards');
-    container.innerHTML = courses.map((course, index) => `
+    container.innerHTML = courses.map((course) => {
+      const courseData = encodeURIComponent(JSON.stringify({ course, localThing: input }));
+      return `
       <div class="course-card">
         <div class="card-header">
           <span class="card-title">${course.课程名称 || course.name || '未命名课程'}</span>
@@ -163,10 +164,11 @@
           <div class="card-section-content">${course.延伸问题 || course.question || '无'}</div>
         </div>
         <div class="card-actions">
-          <button class="detail-btn" onclick="openCourseDetail(${index}, '${input.replace(/'/g, "\\'")}')">📖 查看详情</button>
+          <button class="detail-btn" onclick="window.open('detail.html?data=${courseData}', '_blank')">📖 查看详情</button>
         </div>
       </div>
-    `).join('');
+      `;
+    }).join('');
 
     document.getElementById('result-subtitle').textContent = `基于"${input}"生成的课程方案`;
   }

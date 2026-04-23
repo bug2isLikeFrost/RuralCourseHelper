@@ -7,6 +7,21 @@
     setupTypeButtons();
     setupGenerateButton();
     setupActionButtons();
+    setupApiKeyInput();
+  }
+
+  function setupApiKeyInput() {
+    const apiKeyInput = document.getElementById('api-key');
+    apiKeyInput.addEventListener('input', (e) => {
+      const key = e.target.value.trim();
+      if (key) {
+        setApiKey(key);
+        API_CONFIG.useLocal = false;
+      } else {
+        API_CONFIG.useLocal = true;
+        API_CONFIG.apiKey = undefined;
+      }
+    });
   }
 
   function setupSplashScreen() {

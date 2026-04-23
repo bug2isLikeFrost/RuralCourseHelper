@@ -1,5 +1,4 @@
 const API_CONFIG = {
-  apiKey: 'sk-e397eb9c02964beea4414ff32b235201',
   apiUrl: 'https://api.deepseek.com/chat/completions',
   localUrl: '/api/generate',
   model: 'deepseek-chat',
@@ -18,6 +17,10 @@ async function callAI(prompt) {
     }
     const data = await response.json();
     return data.result;
+  }
+
+  if (!API_CONFIG.apiKey) {
+    throw new Error('API Key 未配置，请通过后端代理调用或配置 API Key');
   }
 
   const response = await fetch(API_CONFIG.apiUrl, {

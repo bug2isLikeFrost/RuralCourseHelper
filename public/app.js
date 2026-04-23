@@ -123,26 +123,36 @@
     showPage('result-page');
   }
 
+  function formatSteps(steps) {
+    if (Array.isArray(steps)) {
+      return steps.join('<br>');
+    }
+    if (typeof steps === 'string') {
+      return steps.replace(/\n/g, '<br>');
+    }
+    return String(steps);
+  }
+
   function renderCourses(courses, input) {
     const container = document.getElementById('course-cards');
     container.innerHTML = courses.map(course => `
       <div class="course-card">
         <div class="card-header">
-          <span class="card-title">${course.课程名称}</span>
-          <span class="card-subject">${course.学科}</span>
+          <span class="card-title">${course.课程名称 || course.name || '未命名课程'}</span>
+          <span class="card-subject">${course.学科 || course.subject || '综合'}</span>
         </div>
-        <div class="card-grade">适合年级：${course.适合年级}</div>
+        <div class="card-grade">适合年级：${course.适合年级 || course.grade || '未知'}</div>
         <div class="card-section">
           <div class="card-section-title">核心知识点</div>
-          <div class="card-section-content">${course.核心知识点}</div>
+          <div class="card-section-content">${course.核心知识点 || course.knowledge || '无'}</div>
         </div>
         <div class="card-section">
           <div class="card-section-title">活动步骤</div>
-          <div class="card-section-content">${course.活动步骤.replace(/\n/g, '<br>')}</div>
+          <div class="card-section-content">${formatSteps(course.活动步骤 || course.steps)}</div>
         </div>
         <div class="card-section">
           <div class="card-section-title">延伸问题</div>
-          <div class="card-section-content">${course.延伸问题}</div>
+          <div class="card-section-content">${course.延伸问题 || course.question || '无'}</div>
         </div>
       </div>
     `).join('');

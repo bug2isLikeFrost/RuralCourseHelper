@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>乡野课程助手</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <section id="splash-page" class="page active">
+      <div class="splash-content">
+        <div class="logo">🌾</div>
+        <h1>乡野课程助手</h1>
+        <p class="tagline">让乡野成为课堂</p>
+      </div>
+    </section>
+
+    <section id="input-page" class="page">
+      <div class="input-container">
+        <header class="header">
+          <h1>📚 乡野课程助手</h1>
+          <p class="subtitle">让乡土资源走进课堂</p>
+        </header>
+
+        <div class="input-section">
+          <label for="local-thing">描述本地事物</label>
+          <textarea
+            id="local-thing"
+            placeholder="例如：竹林、稻田、腌菜、春节习俗、二十四节气..."
+            rows="4"
+          ></textarea>
+
+          <div class="type-selector">
+            <span class="type-label">素材类型：</span>
+            <div class="type-buttons">
+              <button class="type-btn active" data-type="其他">其他</button>
+              <button class="type-btn" data-type="植物">🌱 植物</button>
+              <button class="type-btn" data-type="动物">🐾 动物</button>
+              <button class="type-btn" data-type="食物">🍚 食物</button>
+              <button class="type-btn" data-type="习俗">🎊 习俗</button>
+              <button class="type-btn" data-type="节气">🌿 节气</button>
+            </div>
+          </div>
+
+          <button id="generate-btn" class="generate-btn">
+            生成课程方案
+          </button>
+        </div>
+
+        <div id="loading" class="loading hidden">
+          <div class="spinner"></div>
+          <p>AI正在构思课程方案...</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="result-page" class="page">
+      <div class="result-container">
+        <header class="result-header">
+          <h2>✨ 为您生成的课程方案</h2>
+          <p class="result-subtitle" id="result-subtitle"></p>
+        </header>
+
+        <div id="course-cards" class="course-cards"></div>
+
+        <div class="action-buttons">
+          <button id="regenerate-btn" class="action-btn secondary">🔄 重新生成</button>
+          <button id="back-btn" class="action-btn">← 返回输入</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="prompt.js"></script>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

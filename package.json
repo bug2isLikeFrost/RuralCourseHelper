@@ -1,0 +1,14 @@
+{
+  "name": "rural-course-helper",
+  "version": "1.0.0",
+  "description": "乡野课程助手 - AI生成跨学科课程方案",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}

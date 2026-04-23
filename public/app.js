@@ -140,10 +140,22 @@
     window.open(`detail.html?data=${encoded}`, '_blank');
   };
 
+  function truncateText(text, maxLength) {
+    if (!text) return '';
+    if (typeof text === 'string') {
+      return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    }
+    if (Array.isArray(text)) {
+      return text.length > 2 ? text.slice(0, 2).join('、') + '...' : text.join('、');
+    }
+    return String(text);
+  }
+
   function renderCourses(courses, input) {
     const container = document.getElementById('course-cards');
     container.innerHTML = courses.map((course) => {
       const courseData = encodeURIComponent(JSON.stringify({ course, localThing: input }));
+      const knowledge = truncateText(course.核心知识点 || course.knowledge, 30);
       return `
       <div class="course-card">
         <div class="card-header">
@@ -153,18 +165,10 @@
         <div class="card-grade">适合年级：${course.适合年级 || course.grade || '未知'}</div>
         <div class="card-section">
           <div class="card-section-title">核心知识点</div>
-          <div class="card-section-content">${course.核心知识点 || course.knowledge || '无'}</div>
-        </div>
-        <div class="card-section">
-          <div class="card-section-title">活动步骤</div>
-          <div class="card-section-content">${formatSteps(course.活动步骤 || course.steps)}</div>
-        </div>
-        <div class="card-section">
-          <div class="card-section-title">延伸问题</div>
-          <div class="card-section-content">${course.延伸问题 || course.question || '无'}</div>
+          <div class="card-section-content">${knowledge}</div>
         </div>
         <div class="card-actions">
-          <button class="detail-btn" onclick="window.open('detail.html?data=${courseData}', '_blank')">📖 查看详情</button>
+          <button class="detail-btn" onclick="window.open('detail.html?data=${courseData}', '_blank')">📖 查看完整课程</button>
         </div>
       </div>
       `;

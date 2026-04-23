@@ -133,12 +133,12 @@
     return String(steps);
   }
 
-  function openCourseDetail(index, localThing) {
+  window.openCourseDetail = function(index, localThing) {
     const course = window.courseData[index];
     if (!course) return;
     const encoded = encodeURIComponent(JSON.stringify({ course, localThing }));
     window.open(`detail.html?data=${encoded}`, '_blank');
-  }
+  };
 
   function renderCourses(courses, input) {
     window.courseData = courses;

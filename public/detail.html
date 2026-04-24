@@ -61,6 +61,24 @@
       line-height: 1.8;
       color: var(--text-dark);
     }
+    .knowledge-base-content {
+      font-size: 14px;
+      line-height: 2;
+      color: var(--text-dark);
+      text-align: justify;
+    }
+    .knowledge-base-content p {
+      margin: 0 0 12px 0;
+      text-indent: 2em;
+    }
+    .knowledge-base-content p:first-child {
+      text-indent: 0;
+    }
+    .knowledge-base-content p:first-child::first-letter {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--bamboo-green);
+    }
     .related-link {
       display: block;
       padding: 10px 15px;
@@ -105,6 +123,16 @@
       border-radius: 12px;
       font-size: 12px;
       margin: 4px;
+    }
+    .materials-tag {
+      display: inline-block;
+      background: #fff3e0;
+      color: #e65100;
+      padding: 6px 14px;
+      border-radius: 15px;
+      font-size: 13px;
+      margin: 4px;
+      border: 1px solid #ffcc80;
     }
     .local-thing-banner {
       background: linear-gradient(135deg, var(--bamboo-green) 0%, var(--grass-green) 100%);
@@ -153,6 +181,11 @@
           <div class="detail-section-content" id="course-steps">-</div>
         </div>
 
+        <div class="detail-section" id="materials-section" style="display:none;">
+          <div class="detail-section-title">📦 所需材料</div>
+          <div class="detail-section-content" id="course-materials">-</div>
+        </div>
+
         <div class="detail-section">
           <div class="detail-section-title">❓ 延伸问题</div>
           <div class="detail-section-content" id="course-question">-</div>
@@ -166,9 +199,11 @@
         <div class="detail-section" id="links-section" style="display:none;">
           <div class="detail-section-title">🔗 相关链接</div>
           <div id="course-links"></div>
+          <p style="font-size: 12px; color: #888; margin-top: 8px;">💡 提示：链接已尽可能验证有效性，如有访问问题请搜索相关关键词</p>
         </div>
 
         <a href="index.html" class="back-btn">← 返回首页</a>
+        <button id="back-to-list-btn" class="back-btn" style="background: #666; margin-left: 10px;">← 返回课程方案</button>
       </div>
     </div>
   </div>
@@ -182,18 +217,41 @@
     function formatSteps(steps) {
       if (Array.isArray(steps)) {
         return steps.map((s, i) => {
-          const cleanStep = String(s).replace(/^\d+[.、)]\s*/, '');
-          return `${i + 1}. ${cleanStep}`;
+          const cleanStep = toChinesePunctuation(String(s).replace(/^\d+[.、)]\s*/, ''));
+          return `<b>${i + 1}.</b> ${cleanStep}`;
         }).join('<br>');
       }
       if (typeof steps === 'string') {
         const lines = steps.split('\n').filter(line => line.trim());
         return lines.map((line, i) => {
-          const cleanLine = line.replace(/^\d+[.、)]\s*/, '');
-          return `${i + 1}. ${cleanLine}`;
+          const cleanLine = toChinesePunctuation(line.replace(/^\d+[.、)]\s*/, ''));
+          return `<b>${i + 1}.</b> ${cleanLine}`;
         }).join('<br>');
       }
-      return String(steps);
+      return toChinesePunctuation(String(steps));
+    }
+
+    function formatKnowledgeBase(text) {
+      if (!text) return '';
+      const paragraphs = text.split(/[。！？；\n]/)
+        .map(p => p.trim())
+        .filter(p => p.length > 10);
+      return paragraphs.map(p => `<p>${p}。</p>`).join('');
+    }
+
+    function toChinesePunctuation(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/:/g, '：')
+        .replace(/'/g, '"')
+        .replace(/"/g, '"')
+        .replace(/,/g, '，')
+        .replace(/\./g, '。')
+        .replace(/;/g, '；')
+        .replace(/!/g, '！')
+        .replace(/\?/g, '？')
+        .replace(/"/g, '"')
+        .replace(/"/g, '"');
     }
 
     function extractKeywords(course, localThing) {
@@ -202,31 +260,62 @@
       if (course.学科 || course.subject) keywords.push(course.学科 || course.subject);
       if (course.课程名称 || course.name) {
         const name = course.课程名称 || course.name;
-        keywords.push(name.replace(/观察|日记|课|科学|奥秘/g, ''));
+        keywords.push(name.replace(/观察|日记|课|科学|奥秘/g, '').trim());
       }
       if (course.核心知识点 || course.knowledge) {
-        const kn = (course.核心知识点 || course.knowledge).split(/[，,、]/);
-        keywords.push(...kn.slice(0, 3));
+        const knText = String(course.核心知识点 || course.knowledge);
+        const kn = knText.split(/[，,、；;]/);
+        kn.forEach(k => {
+          const cleaned = k.replace(/[^\w\u4e00-\u9fa5]/g, '').trim();
+          if (cleaned && cleaned.length <= 10) {
+            keywords.push(cleaned);
+          }
+        });
       }
       return keywords.filter(k => k && k.length > 1).slice(0, 6);
     }
 
     function init() {
-      const dataParam = getUrlParam('data');
-      if (!dataParam) {
-        document.getElementById('course-title').textContent = '无效的课程数据';
+      let courseData = null;
+
+      try {
+        const dataParam = getUrlParam('data');
+        if (dataParam) {
+          const jsonStr = decodeURIComponent(atob(dataParam));
+          courseData = JSON.parse(jsonStr);
+        }
+      } catch (e) {
+        console.error('URL参数解析失败:', e);
+      }
+
+      if (!courseData) {
+        document.getElementById('course-title').textContent = '无效的课程数据，请返回重新生成';
         return;
       }
 
       try {
-        const { course, localThing } = JSON.parse(decodeURIComponent(dataParam));
+        const { course, localThing } = courseData;
 
-        document.getElementById('course-title').textContent = course.课程名称 || course.name || '未命名课程';
-        document.getElementById('course-subject').textContent = course.学科 || course.subject || '综合';
-        document.getElementById('course-grade').textContent = `适合年级：${course.适合年级 || course.grade || '未知'}`;
-        document.getElementById('course-knowledge').textContent = course.核心知识点 || course.knowledge || '无';
+        document.getElementById('course-title').textContent = toChinesePunctuation(course.课程名称 || course.name || '未命名课程');
+        document.getElementById('course-subject').textContent = toChinesePunctuation(course.学科 || course.subject || '综合');
+        document.getElementById('course-grade').textContent = `适合年级：${toChinesePunctuation(course.适合年级 || course.grade || '未知')}`;
+
+        const knowledgeText = toChinesePunctuation(Array.isArray(course.核心知识点) ? course.核心知识点.join('、') : (course.核心知识点 || course.knowledge || '无'));
+        document.getElementById('course-knowledge').textContent = knowledgeText;
         document.getElementById('course-steps').innerHTML = formatSteps(course.活动步骤 || course.steps);
-        document.getElementById('course-question').textContent = course.延伸问题 || course.question || '无';
+
+        const materials = course.所需材料 || course.materials;
+        if (materials) {
+          const materialsText = toChinesePunctuation(Array.isArray(materials) ? materials.join('、') : String(materials));
+          const materialList = materialsText.split(/[、，,]/).filter(m => m.trim());
+          document.getElementById('course-materials').innerHTML = materialList.map(m =>
+            `<span class="materials-tag">${m.trim()}</span>`
+          ).join('');
+          document.getElementById('materials-section').style.display = 'block';
+        }
+
+        const questionText = toChinesePunctuation(Array.isArray(course.延伸问题) ? course.延伸问题.join('、') : (course.延伸问题 || course.question || '无'));
+        document.getElementById('course-question').textContent = questionText;
 
         const keywords = extractKeywords(course, localThing);
         document.getElementById('keywords-container').innerHTML = keywords.map(k =>
@@ -235,7 +324,9 @@
 
         const knowledgeBase = course.知识库 || course.knowledgeBase;
         if (knowledgeBase) {
-          document.getElementById('course-knowledge-base').textContent = knowledgeBase;
+          const kbText = toChinesePunctuation(Array.isArray(knowledgeBase) ? knowledgeBase.join('、') : String(knowledgeBase));
+          const kbHtml = formatKnowledgeBase(kbText);
+          document.getElementById('course-knowledge-base').innerHTML = kbHtml;
           document.getElementById('knowledge-section').style.display = 'block';
         }
 
@@ -246,14 +337,17 @@
           ).join('');
           document.getElementById('links-section').style.display = 'block';
         }
-
       } catch (e) {
-        console.error('解析失败:', e);
-        document.getElementById('course-title').textContent = '数据加载失败';
+        console.error('显示课程详情失败:', e);
+        document.getElementById('course-title').textContent = '数据加载失败，请返回重试';
       }
     }
 
     document.addEventListener('DOMContentLoaded', init);
+
+    document.getElementById('back-to-list-btn').addEventListener('click', function() {
+      window.close();
+    });
   </script>
 </body>
 </html>
